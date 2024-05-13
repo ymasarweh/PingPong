@@ -28,6 +28,8 @@
 // Ball size and movement speed
 #define ball_size 1
 #define ball_speed 1
+// Defining length of Paddle
+#define N 6
 
 // Global variables
 static int score1;
@@ -52,7 +54,11 @@ struct target{
 	int reach;
 	}target;
 
-
+struct Snake{
+	int x[N];
+	int y[N];
+	int direction;
+	}paddle1,paddle2;
 //---------------------------------------------
 // Game
 //---------------------------------------------
