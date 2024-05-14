@@ -163,10 +163,10 @@ int GameOver(void)
         
         key = UartGetc();
         
-        if (key == 'r')
+        if (key == RESET)
             return 1;
         
-        else if (key == 'q')
+        else if (key == QUIT)
             return 0;
         
         else
@@ -182,7 +182,7 @@ void UART_ISR(void)
     char key = 0;
     key = UartGetc();    
 
-    if (key == 'w' && paddle1_pos > top_boundary + boundary_thick)
+    if (key == UP && paddle1_pos > top_boundary + boundary_thick)
     {
         // Erase previous paddle
         draw_paddle(left_boundary + boundary_thick, paddle1_pos, paddle_height, paddle_width, BLACK); // Adjusted left paddle position
@@ -190,7 +190,7 @@ void UART_ISR(void)
         // Draw new paddle
         draw_paddle(left_boundary + boundary_thick, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
     }
-    else if (key == 's' && paddle1_pos < bottom_boundary - paddle_height - boundary_thick)
+    else if (key == DOWN && paddle1_pos < bottom_boundary - paddle_height - boundary_thick)
     {
         // Erase previous paddle
         draw_paddle(left_boundary + boundary_thick, paddle1_pos, paddle_height, paddle_width, BLACK); // Adjusted left paddle position
@@ -198,7 +198,7 @@ void UART_ISR(void)
         // Draw new paddle
         draw_paddle(left_boundary + boundary_thick, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
     }
-    else if (key == 'i' && paddle2_pos > top_boundary + boundary_thick)
+    else if (key == UP2 && paddle2_pos > top_boundary + boundary_thick)
     {
         // Erase previous paddle
         draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, BLACK); // Adjusted right paddle position
@@ -206,7 +206,7 @@ void UART_ISR(void)
         // Draw new paddle
         draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN); // Adjusted right paddle position
     }
-    else if (key == 'j' && paddle2_pos < bottom_boundary - paddle_height - boundary_thick)
+    else if (key == DOWN2 && paddle2_pos < bottom_boundary - paddle_height - boundary_thick)
     {
         // Erase previous paddle
         draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, BLACK); // Adjusted right paddle position
@@ -214,7 +214,7 @@ void UART_ISR(void)
         // Draw new paddle
         draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN); // Adjusted right paddle position
     }
-    else if (key == 'p')
+    else if (key == PAUSE)
     {
         if (pause == 0)
         {
