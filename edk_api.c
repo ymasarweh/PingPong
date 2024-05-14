@@ -26,6 +26,19 @@ void SoC_init(void){
 // Display the number of interrupts on the 7-segment display
 //---------------------------------------------
 
+void Display_Int_2_scores(int score1, int score2){
+	
+	dig4 = score1 % 10;
+	dig3 = score1 / 10;
+	
+	dig2 = score2 % 10;
+	dig1 = score2 / 10;
+	
+	seven_seg_write( dig1, dig2, dig3, dig4);
+
+}
+
+
 void Display_Int_Times(void){
 	
 	dig4++;
@@ -108,4 +121,5 @@ char random (char min, char max){
 	
 	return i;
 }
+
 
