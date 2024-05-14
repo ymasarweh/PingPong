@@ -31,6 +31,7 @@ static int paddle1_pos;
 static int paddle2_pos;
 static int pause;
 static int gamespeed;
+static int speed_table[10] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11}; // Speed table
 
 // Structure definitions
 struct Ball {
@@ -72,6 +73,19 @@ void generate_ball(void) {
     ball.speed_y = ball_speed;
 }
 
+void draw_paddle(int x, int y, int height, int width, int color) {
+    rectangle(x, y, x + width, y + height, color);
+}
+
+void draw_ball(int x, int y, int size, int color) {
+    rectangle(x, y, x + size, y + size, color);
+}
+
+void draw_score(int score1, int score2) {
+    printf("Player 1: %d\n", score1);
+    printf("Player 2: %d\n", score2);
+}
+
 void Game_Init(void)
 {
     // Draw a game region
@@ -105,7 +119,7 @@ void Game_Init(void)
     printf("\nKeyboard s ...... move down");//player 1
     printf("\n   Player 2: Paddle 2   ");//player 2
     printf("\nKeyboard i ........ move up");//player 2
-    printf("\nKeyboard k ...... move down");//player 2
+    printf("\nKeyboard j ...... move down");//player 2
     printf("\n---------------------------");
     printf("\nTo run the game, make sure:");
     printf("\n*UART terminal is activated");
@@ -121,6 +135,11 @@ void Game_Init(void)
 
     // Call the generate_ball() function to generate and launch the ball
     generate_ball();
+    
+    // Draw initial game state
+    draw_paddle(left_boundary - 1, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
+    draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN);
+    draw_ball(ball.x, ball.y, ball_size, RED);
 }
     
 int GameOver(void)
@@ -161,19 +180,35 @@ void UART_ISR(void)
 
     if (key == 'w' && paddle1_pos > top_boundary + boundary_thick)
     {
+        // Erase previous paddle
+        draw_paddle(left_boundary + 1, paddle1_pos, paddle_height, paddle_width, BLACK); // Adjusted left paddle position
         paddle1_pos -= paddle_speed;
+        // Draw new paddle
+        draw_paddle(left_boundary + 1, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
     }
     else if (key == 's' && paddle1_pos < bottom_boundary - paddle_height - boundary_thick)
-    {
+			{
+        // Erase previous paddle
+        draw_paddle(left_boundary + 1, paddle1_pos, paddle_height, paddle_width, BLACK); // Adjusted left paddle position
         paddle1_pos += paddle_speed;
+        // Draw new paddle
+        draw_paddle(left_boundary + 1, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
     }
     else if (key == 'i' && paddle2_pos > top_boundary + boundary_thick)
     {
+        // Erase previous paddle
+        draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, BLACK);
         paddle2_pos -= paddle_speed;
+        // Draw new paddle
+        draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN);
     }
-    else if (key == 'k' && paddle2_pos < bottom_boundary - paddle_height - boundary_thick)
+    else if (key == 'j' && paddle2_pos < bottom_boundary - paddle_height - boundary_thick)
     {
+        // Erase previous paddle
+        draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, BLACK);
         paddle2_pos += paddle_speed;
+        // Draw new paddle
+        draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN);
     }
     else if (key == 'p')
     {
@@ -195,6 +230,9 @@ void UART_ISR(void)
 //---------------------------------------------
 void Timer_ISR(void)
 {
+    // Erase previous ball
+    draw_ball(ball.x, ball.y, ball_size, BLACK);
+    
     // Move ball
     ball.x += ball.dir_x * ball.speed_x;
     ball.y += ball.dir_y * ball.speed_y;
@@ -208,10 +246,12 @@ void Timer_ISR(void)
     if (ball.x <= left_boundary + paddle_width && ball.y >= paddle1_pos && ball.y <= paddle1_pos + paddle_height)
     {
         ball.dir_x = -ball.dir_x;
+        ball.speed_x = speed_table[score1 % 10]; // Increase ball speed after hit
     }
     else if (ball.x >= right_boundary - paddle_width && ball.y >= paddle2_pos && ball.y <= paddle2_pos + paddle_height)
     {
         ball.dir_x = -ball.dir_x;
+        ball.speed_x = speed_table[score2 % 10]; // Increase ball speed after hit
     }
     else if (ball.x <= left_boundary || ball.x >= right_boundary)
     {
@@ -221,24 +261,22 @@ void Timer_ISR(void)
         else
             score1++;
         
+        // Clear previous score and update it
+        draw_score(score1, score2);
+        
+        if (score1 == 10 || score2 == 10) {
+            if (score1 == 10)
+                printf("Player 1 wins!\n");
+            else
+                printf("Player 2 wins!\n");
+            GameOver();
+        }
+        
         generate_ball();
     }
 
-    // Draw updated positions
-    clear_screen();
-    rectangle(left_boundary, top_boundary, right_boundary, top_boundary + boundary_thick, BLUE);
-    rectangle(left_boundary, top_boundary, left_boundary + boundary_thick, bottom_boundary, BLUE);
-    rectangle(left_boundary, bottom_boundary, right_boundary, bottom_boundary + boundary_thick, BLUE);
-    rectangle(right_boundary, top_boundary, right_boundary + boundary_thick, bottom_boundary + boundary_thick, BLUE);
-    
-    rectangle(paddle1_pos, left_boundary, paddle1_pos + paddle_height, left_boundary + paddle_width, GREEN);
-    rectangle(paddle2_pos, right_boundary - paddle_width, paddle2_pos + paddle_height, right_boundary, GREEN);
-    
-    rectangle(ball.x, ball.y, ball.x + ball_size, ball.y + ball_size, RED);
-    
-    // Print the score
-    printf("Player 1: %d\n", score1);
-    printf("Player 2: %d\n", score2);
+    // Draw new ball
+    draw_ball(ball.x, ball.y, ball_size, RED);
 
     // Clear timer irq
     timer_irq_clear();
