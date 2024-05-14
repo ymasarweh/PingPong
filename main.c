@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 // Game region
-#define left_boundary 5
+#define left_boundary 4
 #define right_boundary 96
 #define top_boundary 5
 #define bottom_boundary 116
@@ -82,7 +82,7 @@ void draw_ball(int x, int y, int size, int color) {
 }
 
 void draw_score(int score1, int score2) {
-    printf("Player 1: %d\n", score1);
+    printf("\nPlayer 1: %d\n", score1);
     printf("Player 2: %d\n", score2);
 }
 
@@ -137,9 +137,12 @@ void Game_Init(void)
     generate_ball();
     
     // Draw initial game state
-    draw_paddle(left_boundary - 1, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
-    draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN);
+    draw_paddle(left_boundary + 1, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
+    draw_paddle(right_boundary - paddle_width - 1, paddle2_pos, paddle_height, paddle_width, GREEN); // Adjusted right paddle position
     draw_ball(ball.x, ball.y, ball_size, RED);
+    
+    // Draw initial score
+    draw_score(score1, score2);
 }
     
 int GameOver(void)
@@ -187,7 +190,7 @@ void UART_ISR(void)
         draw_paddle(left_boundary + 1, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
     }
     else if (key == 's' && paddle1_pos < bottom_boundary - paddle_height - boundary_thick)
-			{
+    {
         // Erase previous paddle
         draw_paddle(left_boundary + 1, paddle1_pos, paddle_height, paddle_width, BLACK); // Adjusted left paddle position
         paddle1_pos += paddle_speed;
@@ -197,18 +200,18 @@ void UART_ISR(void)
     else if (key == 'i' && paddle2_pos > top_boundary + boundary_thick)
     {
         // Erase previous paddle
-        draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, BLACK);
+        draw_paddle(right_boundary - paddle_width - 1, paddle2_pos, paddle_height, paddle_width, BLACK); // Adjusted right paddle position
         paddle2_pos -= paddle_speed;
         // Draw new paddle
-        draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN);
+        draw_paddle(right_boundary - paddle_width - 1, paddle2_pos, paddle_height, paddle_width, GREEN); // Adjusted right paddle position
     }
     else if (key == 'j' && paddle2_pos < bottom_boundary - paddle_height - boundary_thick)
     {
         // Erase previous paddle
-        draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, BLACK);
+        draw_paddle(right_boundary - paddle_width - 1, paddle2_pos, paddle_height, paddle_width, BLACK); // Adjusted right paddle position
         paddle2_pos += paddle_speed;
         // Draw new paddle
-        draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN);
+        draw_paddle(right_boundary - paddle_width - 1, paddle2_pos, paddle_height, paddle_width, GREEN); // Adjusted right paddle position
     }
     else if (key == 'p')
     {
@@ -243,12 +246,12 @@ void Timer_ISR(void)
         ball.dir_y = -ball.dir_y;
     }
 
-    if (ball.x <= left_boundary + paddle_width && ball.y >= paddle1_pos && ball.y <= paddle1_pos + paddle_height)
+    if (ball.x <= left_boundary + paddle_width + 1 && ball.y >= paddle1_pos && ball.y <= paddle1_pos + paddle_height)
     {
         ball.dir_x = -ball.dir_x;
         ball.speed_x = speed_table[score1 % 10]; // Increase ball speed after hit
     }
-    else if (ball.x >= right_boundary - paddle_width && ball.y >= paddle2_pos && ball.y <= paddle2_pos + paddle_height)
+    else if (ball.x >= right_boundary - paddle_width - 1 && ball.y >= paddle2_pos && ball.y <= paddle2_pos + paddle_height)
     {
         ball.dir_x = -ball.dir_x;
         ball.speed_x = speed_table[score2 % 10]; // Increase ball speed after hit
@@ -269,10 +272,15 @@ void Timer_ISR(void)
                 printf("Player 1 wins!\n");
             else
                 printf("Player 2 wins!\n");
-            GameOver();
+            if (GameOver()) {
+                Game_Init();
+            } else {
+                Game_Close();
+                while (1);
+            }
+        } else {
+            generate_ball();
         }
-        
-        generate_ball();
     }
 
     // Draw new ball
