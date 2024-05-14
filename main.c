@@ -7,6 +7,7 @@
 #include "edk_driver.h"
 #include "edk_api.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 // Game region
 #define left_boundary 4
@@ -65,8 +66,8 @@ void generate_ball(void) {
     ball.y = (top_boundary + bottom_boundary) / 2;
 
     // Generate random direction for the ball
-    ball.dir_x = (random(0, 1) == 0) ? -1 : 1;  // Randomly choose between -1 (left) and 1 (right)
-    ball.dir_y = (random(0, 1) == 0) ? -1 : 1;  // Randomly choose between -1 (up) and 1 (down)
+    ball.dir_x = (rand()%2 == 0) ? -1 : 1;  // Randomly choose between -1 (left) and 1 (right)
+    ball.dir_y = (rand()%2 == 0) ? -1 : 1;  // Randomly choose between -1 (up) and 1 (down)
 
     // Set the ball speed
     ball.speed_x = ball_speed;
@@ -110,6 +111,18 @@ void Game_Init(void)
  
     // By default, set pause to 0
     pause = 0;
+		
+		
+		  // Call the generate_ball() function to generate and launch the ball
+    generate_ball();
+    
+   // Draw initial game state
+    draw_paddle(left_boundary + boundary_thick, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
+    draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN); // Adjusted right paddle position
+    draw_ball(ball.x, ball.y, ball_size, RED);
+    
+    // Draw initial score
+    draw_score(score1, score2);
 
     // Print instructions on text console of VGA
     printf("\n------- Pong Game --------");
@@ -134,16 +147,7 @@ void Game_Init(void)
     NVIC_EnableIRQ(Timer_IRQn); //start timing
     NVIC_EnableIRQ(UART_IRQn);
 
-    // Call the generate_ball() function to generate and launch the ball
-    generate_ball();
-    
-    // Draw initial game state
-    draw_paddle(left_boundary + boundary_thick, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
-    draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN); // Adjusted right paddle position
-    draw_ball(ball.x, ball.y, ball_size, RED);
-    
-    // Draw initial score
-    draw_score(score1, score2);
+  
 }
     
 int GameOver(void)
