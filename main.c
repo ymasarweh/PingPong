@@ -121,8 +121,7 @@ void Game_Init(void)
     draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN); // Adjusted right paddle position
     draw_ball(ball.x, ball.y, ball_size, RED);
     
-    // Draw initial score
-    draw_score(score1, score2);
+  
 
     // Print instructions on text console of VGA
     printf("\n------- Pong Game --------");
@@ -142,6 +141,12 @@ void Game_Init(void)
     printf("\n---------------------------");
     printf("\nPress any key to start\n");
 
+
+
+  // Draw initial score
+    draw_score(score1, score2);
+		
+		
     while (KBHIT() == 0); //wait till keyboard press is detected
 
     NVIC_EnableIRQ(Timer_IRQn); //start timing
