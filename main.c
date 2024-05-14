@@ -31,7 +31,7 @@ static int paddle1_pos;
 static int paddle2_pos;
 static int pause;
 static int gamespeed;
-static int speed_table[10] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11}; // Speed table
+static int speed_table[10] = {1, 1, 2, 2, 3, 3, 4, 4, 5, 5}; // Speed table
 
 // Structure definitions
 struct Ball {
@@ -84,6 +84,7 @@ void draw_ball(int x, int y, int size, int color) {
 void draw_score(int score1, int score2) {
     printf("\nPlayer 1: %d\n", score1);
     printf("Player 2: %d\n", score2);
+		Display_Int_2_scores(score1,score2);
 }
 
 void Game_Init(void)
@@ -233,6 +234,8 @@ void UART_ISR(void)
 //---------------------------------------------
 void Timer_ISR(void)
 {
+    static int hit_count = 0; // Counter to track the number of paddle hits
+
     // Erase previous ball
     draw_ball(ball.x, ball.y, ball_size, BLACK);
     
@@ -240,21 +243,34 @@ void Timer_ISR(void)
     ball.x += ball.dir_x * ball.speed_x;
     ball.y += ball.dir_y * ball.speed_y;
 
-    // Collision detection with paddles and boundaries
+    // Collision detection with boundaries
     if (ball.y <= top_boundary + boundary_thick || ball.y >= bottom_boundary - boundary_thick)
     {
         ball.dir_y = -ball.dir_y;
     }
 
-    if (ball.x <= left_boundary + boundary_thick + paddle_width && ball.y >= paddle1_pos && ball.y <= paddle1_pos + paddle_height)
+    // Collision detection with paddles
+    else if (ball.x <= left_boundary + boundary_thick + paddle_width && ball.y >= paddle1_pos && ball.y <= paddle1_pos + paddle_height)
     {
         ball.dir_x = -ball.dir_x;
-        ball.speed_x = speed_table[score1 % 10]; // Increase ball speed after hit
+
+        // Increment hit count and update ball speed
+        if (hit_count < 9) { // Ensure the hit count does not exceed the size of the speed table
+            hit_count++;
+            ball.speed_x = speed_table[hit_count];
+            ball.speed_y = speed_table[hit_count];
+        }
     }
     else if (ball.x >= right_boundary - paddle_width && ball.y >= paddle2_pos && ball.y <= paddle2_pos + paddle_height)
     {
         ball.dir_x = -ball.dir_x;
-        ball.speed_x = speed_table[score2 % 10]; // Increase ball speed after hit
+
+        // Increment hit count and update ball speed
+        if (hit_count < 9) { // Ensure the hit count does not exceed the size of the speed table
+            hit_count++;
+            ball.speed_x = speed_table[hit_count];
+            ball.speed_y = speed_table[hit_count];
+        }
     }
     else if (ball.x <= left_boundary || ball.x >= right_boundary)
     {
@@ -266,6 +282,9 @@ void Timer_ISR(void)
         
         // Clear previous score and update it
         draw_score(score1, score2);
+
+        // Reset hit count when a point is scored
+        hit_count = 0;
         
         if (score1 == 10 || score2 == 10) {
             if (score1 == 10)
