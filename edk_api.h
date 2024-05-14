@@ -45,6 +45,8 @@
 
 void SoC_init(void);					//SoC initialization
 
+void Display_Int_2_scores ( int score1, int score2);
+
 void Display_Int_Times(void);				//Display the number of interrupts on the 7-segment display
 
 void rectangle(int x1,int y1,int x2,int y2, int color);		// Draw a rectangle on the screen
