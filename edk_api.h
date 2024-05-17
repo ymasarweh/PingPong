@@ -45,7 +45,7 @@
 
 void SoC_init(void);					//SoC initialization
 
-void Display_Int_2_scores ( int score1, int score2);
+void Display_Int_2_scores ( int score1, int score2);					//Display score using 7-segment - digit 1-2 for one player - digit 3-4 for another player
 
 void Display_Int_Times(void);				//Display the number of interrupts on the 7-segment display
 
