@@ -26,8 +26,8 @@
 #define ball_speed 1
 
 // Global variables
-static int score1;
-static int score2;
+static int score1; // player 1, left paddle
+static int score2; // player 2, right paddle
 static int paddle1_pos;
 static int paddle2_pos;
 static int pause;
@@ -190,7 +190,7 @@ void UART_ISR(void)
 {    
     char key = 0;
     key = UartGetc();    
-
+    // when UP is pressed - left paddle
     if (key == UP && paddle1_pos > top_boundary + boundary_thick)
     {
         // Erase previous paddle
@@ -199,6 +199,7 @@ void UART_ISR(void)
         // Draw new paddle
         draw_paddle(left_boundary + boundary_thick, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
     }
+    // when DOWN is pressed - left paddle
     else if (key == DOWN && paddle1_pos < bottom_boundary - paddle_height - boundary_thick)
     {
         // Erase previous paddle
@@ -207,6 +208,7 @@ void UART_ISR(void)
         // Draw new paddle
         draw_paddle(left_boundary + boundary_thick, paddle1_pos, paddle_height, paddle_width, GREEN); // Adjusted left paddle position
     }
+   // when UP2 is pressed - right paddle
     else if (key == UP2 && paddle2_pos > top_boundary + boundary_thick)
     {
         // Erase previous paddle
@@ -215,6 +217,7 @@ void UART_ISR(void)
         // Draw new paddle
         draw_paddle(right_boundary - paddle_width, paddle2_pos, paddle_height, paddle_width, GREEN); // Adjusted right paddle position
     }
+    // when DOWN2 is pressed - right paddle
     else if (key == DOWN2 && paddle2_pos < bottom_boundary - paddle_height - boundary_thick)
     {
         // Erase previous paddle
